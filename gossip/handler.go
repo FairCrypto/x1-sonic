@@ -3,6 +3,7 @@ package gossip
 import (
 	"errors"
 	"fmt"
+	"github.com/Fantom-foundation/go-opera/opera"
 	"github.com/ethereum/go-ethereum/metrics"
 	"math"
 	"math/rand"
@@ -618,42 +619,47 @@ func (h *handler) Start(maxPeers int) {
 	h.txFetcher.Start()
 	h.checkers.Heavycheck.Start()
 
-	h.epProcessor.Start()
-	h.epSeeder.Start()
-	h.epLeecher.Start()
+	if h.store.GetRules().NetworkID != opera.TestNetworkID {
+		h.epProcessor.Start()
+		h.epSeeder.Start()
+		h.epLeecher.Start()
+
+		h.bvProcessor.Start()
+		h.bvSeeder.Start()
+		h.bvLeecher.Start()
+
+		h.brProcessor.Start()
+		h.brSeeder.Start()
+		h.brLeecher.Start()
+	}
 
 	h.dagProcessor.Start()
 	h.dagSeeder.Start()
 	h.dagLeecher.Start()
 
-	h.bvProcessor.Start()
-	h.bvSeeder.Start()
-	h.bvLeecher.Start()
-
-	h.brProcessor.Start()
-	h.brSeeder.Start()
-	h.brLeecher.Start()
 	h.started.Done()
 }
 
 func (h *handler) Stop() {
 	log.Info("Stopping Fantom protocol")
 
-	h.brLeecher.Stop()
-	h.brSeeder.Stop()
-	h.brProcessor.Stop()
+	if h.store.GetRules().NetworkID != opera.TestNetworkID {
+		h.brLeecher.Stop()
+		h.brSeeder.Stop()
+		h.brProcessor.Stop()
 
-	h.bvLeecher.Stop()
-	h.bvSeeder.Stop()
-	h.bvProcessor.Stop()
+		h.bvLeecher.Stop()
+		h.bvSeeder.Stop()
+		h.bvProcessor.Stop()
+
+		h.epLeecher.Stop()
+		h.epSeeder.Stop()
+		h.epProcessor.Stop()
+	}
 
 	h.dagLeecher.Stop()
 	h.dagSeeder.Stop()
 	h.dagProcessor.Stop()
-
-	h.epLeecher.Stop()
-	h.epSeeder.Stop()
-	h.epProcessor.Stop()
 
 	h.checkers.Heavycheck.Stop()
 	h.txFetcher.Stop()
