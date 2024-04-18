@@ -86,12 +86,12 @@ type dagNotifier interface {
 }
 
 type processCallback struct {
-	Event            func(*inter.EventPayload) error
-	SwitchEpochTo    func(idx.Epoch) error
-	BVs              func(inter.LlrSignedBlockVotes) error
-	BR               func(ibr.LlrIdxFullBlockRecord) error
-	EV               func(inter.LlrSignedEpochVote) error
-	ER               func(ier.LlrIdxFullEpochRecord) error
+	Event         func(*inter.EventPayload) error
+	SwitchEpochTo func(idx.Epoch) error
+	BVs           func(inter.LlrSignedBlockVotes) error
+	BR            func(ibr.LlrIdxFullBlockRecord) error
+	EV            func(inter.LlrSignedEpochVote) error
+	ER            func(ier.LlrIdxFullEpochRecord) error
 }
 
 // handlerConfig is the collection of initialization parameters to create a full
@@ -713,7 +713,7 @@ func (h *handler) highestPeerProgress() PeerProgress {
 // this function terminates, the peer is disconnected.
 func (h *handler) handle(p *peer) error {
 	useless := discfilter.Banned(p.Node().ID(), p.Node().Record())
-	if !useless && !strings.Contains(strings.ToLower(p.Name()), "opera") {
+	if !useless && !strings.Contains(strings.ToLower(p.Name()), "x1") {
 		useless = true
 		discfilter.Ban(p.ID())
 	}
@@ -758,7 +758,7 @@ func (h *handler) handle(p *peer) error {
 		p.Log().Warn("Leecher peer registration failed", "err", err)
 		return err
 	}
-	if p.RunningCap(ProtocolName, []uint{FTM63}) {
+	if p.RunningCap(ProtocolName, []uint{FTM65}) {
 		if err := h.epLeecher.RegisterPeer(p.id); err != nil {
 			p.Log().Warn("Leecher peer registration failed", "err", err)
 			return err

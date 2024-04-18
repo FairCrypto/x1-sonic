@@ -34,7 +34,7 @@ func remoteConsole(ctx *cli.Context) error {
 		if !ctx.GlobalIsSet(flags.DataDirFlag.Name) {
 			return fmt.Errorf("the --%s flag is missing and the IPC endpoint path is not specified", flags.DataDirFlag.Name)
 		}
-		endpoint = fmt.Sprintf("%s/opera.ipc", ctx.GlobalString(flags.DataDirFlag.Name))
+		endpoint = fmt.Sprintf("%s/x1.ipc", ctx.GlobalString(flags.DataDirFlag.Name))
 	}
 	client, err := rpc.Dial(endpoint)
 	if err != nil {

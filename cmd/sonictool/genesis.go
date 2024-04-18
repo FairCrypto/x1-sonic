@@ -6,6 +6,7 @@ import (
 	"github.com/Fantom-foundation/go-opera/cmd/sonictool/genesis"
 	"github.com/Fantom-foundation/go-opera/config/flags"
 	"github.com/Fantom-foundation/go-opera/integration/makefakegenesis"
+	"github.com/Fantom-foundation/go-opera/integration/makeoriginaltestnetgenesis"
 	"github.com/Fantom-foundation/go-opera/opera/genesisstore"
 	futils "github.com/Fantom-foundation/go-opera/utils"
 	"github.com/Fantom-foundation/go-opera/utils/memory"
@@ -124,6 +125,12 @@ func fakeGenesisImport(ctx *cli.Context) error {
 	genesisStore := makefakegenesis.FakeGenesisStore(idx.Validator(validatorsNumber), futils.ToFtm(1000000000), futils.ToFtm(5000000))
 	defer genesisStore.Close()
 	return genesis.ImportGenesisStore(genesisStore, dataDir, validatorMode, cacheRatio)
+}
+
+func testGenesisImport(ctx *cli.Context) error {
+	genesisStore := makeoriginaltestnetgenesis.TestnetGenesisStore()
+	defer genesisStore.Close()
+	return genesis.ImportGenesisStore(genesisStore, ctx.GlobalString(flags.DataDirFlag.Name), false, cachescale.Identity)
 }
 
 func isValidatorModeSet(ctx *cli.Context) (bool, error) {

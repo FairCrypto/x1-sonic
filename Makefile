@@ -1,32 +1,32 @@
 .PHONY: all
-all: sonicd sonictool
+all: x1 x1tool
 
 GOPROXY ?= "https://proxy.golang.org,direct"
-.PHONY: sonicd sonictool
-sonicd:
+.PHONY: x1 x1tool
+x1:
 	GIT_COMMIT=`git rev-list -1 HEAD 2>/dev/null || echo ""` && \
 	GIT_DATE=`git log -1 --date=short --pretty=format:%ct 2>/dev/null || echo ""` && \
 	GOPROXY=$(GOPROXY) \
 	go build \
 	    -ldflags "-s -w -X github.com/Fantom-foundation/go-opera/config.GitCommit=$${GIT_COMMIT} -X github.com/Fantom-foundation/go-opera/config.GitDate=$${GIT_DATE}" \
-	    -o build/sonicd \
+	    -o build/x1 \
 	    ./cmd/sonicd
 
-sonictool:
+x1tool:
 	GIT_COMMIT=`git rev-list -1 HEAD 2>/dev/null || echo ""` && \
 	GIT_DATE=`git log -1 --date=short --pretty=format:%ct 2>/dev/null || echo ""` && \
 	GOPROXY=$(GOPROXY) \
 	go build \
 	    -ldflags "-s -w -X github.com/Fantom-foundation/go-opera/config.GitCommit=$${GIT_COMMIT} -X github.com/Fantom-foundation/go-opera/config.GitDate=$${GIT_DATE}" \
-	    -o build/sonictool \
+	    -o build/x1tool \
 	    ./cmd/sonictool
 
 TAG ?= "latest"
-.PHONY: sonic-image
-sonic-image:
+.PHONY: x1-image
+x1-image:
 	docker build \
     	    --network=host \
-    	    -f ./docker/Dockerfile.opera -t "sonic:$(TAG)" .
+    	    -f ./docker/Dockerfile.opera -t "x1:$(TAG)" .
 
 .PHONY: test
 test:
