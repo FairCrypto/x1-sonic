@@ -9,7 +9,7 @@ import (
 func init() {
 	params.VersionMajor = 1     // Major version component of the current release
 	params.VersionMinor = 1     // Minor version component of the current release
-	params.VersionPatch = 5     // Patch version component of the current release
+	params.VersionPatch = 6     // Patch version component of the current release
 	params.VersionMeta = "rc.5" // Version metadata to append to the version string
 }
 
