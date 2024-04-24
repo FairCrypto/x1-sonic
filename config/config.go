@@ -7,6 +7,7 @@ import (
 	carmen "github.com/Fantom-foundation/Carmen/go/state"
 	"github.com/Fantom-foundation/go-opera/config/flags"
 	"github.com/Fantom-foundation/go-opera/gossip/evmstore"
+	"github.com/Fantom-foundation/go-opera/integration/makecustomgenesis"
 	"github.com/ethereum/go-ethereum/common/fdlimit"
 	"os"
 	"path"
@@ -67,6 +68,7 @@ type Config struct {
 	LachesisStore abft.StoreConfig
 	VectorClock   vecmt.IndexConfig
 	DBs           integration.DBsConfig
+	CustomGenesis makecustomgenesis.Config
 }
 
 func (c *Config) AppConfigs() integration.Configs {
@@ -270,6 +272,7 @@ func MakeAllConfigsFromFile(ctx *cli.Context, configFile string) (*Config, error
 		Lachesis:      abft.DefaultConfig(),
 		LachesisStore: abft.DefaultStoreConfig(cacheRatio),
 		VectorClock:   vecmt.DefaultConfig(cacheRatio),
+		CustomGenesis: makecustomgenesis.DefaultConfig(),
 	}
 
 	if ctx.GlobalIsSet(FakeNetFlag.Name) {

@@ -71,6 +71,19 @@ Initialize the database for a testing fakenet.
 `,
 				},
 				{
+					Name:      "custom",
+					Usage:     "Initialize the database for a custom network",
+					ArgsUsage: "",
+					Action:    customGenesisImport,
+					Flags: []cli.Flag{
+						ModeFlag,
+						flags.ConfigFileFlag,
+					},
+					Description: `
+    x1tool --datadir=<datadir> --config=<configfile> genesis custom
+`,
+				},
+				{
 					Name:   "test",
 					Usage:  "Initialize the database for the testnet network",
 					Action: testGenesisImport,

@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/Fantom-foundation/go-opera/cmd/sonictool/db"
 	"github.com/Fantom-foundation/go-opera/cmd/sonictool/genesis"
+	"github.com/Fantom-foundation/go-opera/config"
 	"github.com/Fantom-foundation/go-opera/config/flags"
+	"github.com/Fantom-foundation/go-opera/integration/makecustomgenesis"
 	"github.com/Fantom-foundation/go-opera/integration/makefakegenesis"
 	"github.com/Fantom-foundation/go-opera/integration/makeoriginaltestnetgenesis"
 	"github.com/Fantom-foundation/go-opera/opera/genesisstore"
@@ -124,6 +126,33 @@ func fakeGenesisImport(ctx *cli.Context) error {
 
 	genesisStore := makefakegenesis.FakeGenesisStore(idx.Validator(validatorsNumber), futils.ToFtm(1000000000), futils.ToFtm(5000000))
 	defer genesisStore.Close()
+	return genesis.ImportGenesisStore(genesisStore, dataDir, validatorMode, cacheRatio)
+}
+func customGenesisImport(ctx *cli.Context) error {
+	dataDir := ctx.GlobalString(flags.DataDirFlag.Name)
+	if dataDir == "" {
+		return fmt.Errorf("--%s need to be set", flags.DataDirFlag.Name)
+	}
+	cacheRatio, err := cacheScaler(ctx)
+	if err != nil {
+		return err
+	}
+	configFile := ctx.String(flags.ConfigFileFlag.Name)
+	if configFile == "" {
+		return fmt.Errorf("--%s need to be set", flags.ConfigFileFlag.Name)
+	}
+	log.Info("Loading custom genesis", "config", configFile)
+
+	cfg, err := config.MakeAllConfigsFromFile(ctx, configFile)
+	if err != nil {
+		return err
+	}
+
+	genesisStore := makecustomgenesis.GenesisStore(cfg.CustomGenesis)
+	validatorMode, err := isValidatorModeSet(ctx)
+	if err != nil {
+		return err
+	}
 	return genesis.ImportGenesisStore(genesisStore, dataDir, validatorMode, cacheRatio)
 }
 
