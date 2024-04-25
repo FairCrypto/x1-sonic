@@ -3,6 +3,7 @@ package gossip
 import (
 	"errors"
 	"fmt"
+	"github.com/Fantom-foundation/go-opera/opera"
 	"github.com/ethereum/go-ethereum/metrics"
 	"math"
 	"math/rand"
@@ -86,12 +87,12 @@ type dagNotifier interface {
 }
 
 type processCallback struct {
-	Event            func(*inter.EventPayload) error
-	SwitchEpochTo    func(idx.Epoch) error
-	BVs              func(inter.LlrSignedBlockVotes) error
-	BR               func(ibr.LlrIdxFullBlockRecord) error
-	EV               func(inter.LlrSignedEpochVote) error
-	ER               func(ier.LlrIdxFullEpochRecord) error
+	Event         func(*inter.EventPayload) error
+	SwitchEpochTo func(idx.Epoch) error
+	BVs           func(inter.LlrSignedBlockVotes) error
+	BR            func(ibr.LlrIdxFullBlockRecord) error
+	EV            func(inter.LlrSignedEpochVote) error
+	ER            func(ier.LlrIdxFullEpochRecord) error
 }
 
 // handlerConfig is the collection of initialization parameters to create a full
@@ -618,42 +619,47 @@ func (h *handler) Start(maxPeers int) {
 	h.txFetcher.Start()
 	h.checkers.Heavycheck.Start()
 
-	h.epProcessor.Start()
-	h.epSeeder.Start()
-	h.epLeecher.Start()
+	if h.store.GetRules().NetworkID != opera.TestNetworkID {
+		h.epProcessor.Start()
+		h.epSeeder.Start()
+		h.epLeecher.Start()
+
+		h.bvProcessor.Start()
+		h.bvSeeder.Start()
+		h.bvLeecher.Start()
+
+		h.brProcessor.Start()
+		h.brSeeder.Start()
+		h.brLeecher.Start()
+	}
 
 	h.dagProcessor.Start()
 	h.dagSeeder.Start()
 	h.dagLeecher.Start()
 
-	h.bvProcessor.Start()
-	h.bvSeeder.Start()
-	h.bvLeecher.Start()
-
-	h.brProcessor.Start()
-	h.brSeeder.Start()
-	h.brLeecher.Start()
 	h.started.Done()
 }
 
 func (h *handler) Stop() {
 	log.Info("Stopping Fantom protocol")
 
-	h.brLeecher.Stop()
-	h.brSeeder.Stop()
-	h.brProcessor.Stop()
+	if h.store.GetRules().NetworkID != opera.TestNetworkID {
+		h.brLeecher.Stop()
+		h.brSeeder.Stop()
+		h.brProcessor.Stop()
 
-	h.bvLeecher.Stop()
-	h.bvSeeder.Stop()
-	h.bvProcessor.Stop()
+		h.bvLeecher.Stop()
+		h.bvSeeder.Stop()
+		h.bvProcessor.Stop()
+
+		h.epLeecher.Stop()
+		h.epSeeder.Stop()
+		h.epProcessor.Stop()
+	}
 
 	h.dagLeecher.Stop()
 	h.dagSeeder.Stop()
 	h.dagProcessor.Stop()
-
-	h.epLeecher.Stop()
-	h.epSeeder.Stop()
-	h.epProcessor.Stop()
 
 	h.checkers.Heavycheck.Stop()
 	h.txFetcher.Stop()
@@ -713,7 +719,7 @@ func (h *handler) highestPeerProgress() PeerProgress {
 // this function terminates, the peer is disconnected.
 func (h *handler) handle(p *peer) error {
 	useless := discfilter.Banned(p.Node().ID(), p.Node().Record())
-	if !useless && !strings.Contains(strings.ToLower(p.Name()), "opera") {
+	if !useless && !strings.Contains(strings.ToLower(p.Name()), "x1") {
 		useless = true
 		discfilter.Ban(p.ID())
 	}
@@ -758,7 +764,7 @@ func (h *handler) handle(p *peer) error {
 		p.Log().Warn("Leecher peer registration failed", "err", err)
 		return err
 	}
-	if p.RunningCap(ProtocolName, []uint{FTM63}) {
+	if p.RunningCap(ProtocolName, []uint{FTM65}) {
 		if err := h.epLeecher.RegisterPeer(p.id); err != nil {
 			p.Log().Warn("Leecher peer registration failed", "err", err)
 			return err

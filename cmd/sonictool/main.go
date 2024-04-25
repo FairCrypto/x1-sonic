@@ -13,7 +13,7 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "sonictool"
+	app.Name = "x1tool"
 	app.Usage = "the Sonic management tool"
 	app.Version = params.VersionWithCommit(config.GitCommit, config.GitDate)
 	app.Flags = []cli.Flag{
@@ -25,7 +25,7 @@ func main() {
 			Name:  "genesis",
 			Usage: "Initialize the database from a genesis file",
 			Description: `
-    sonictool --datadir=<datadir> genesis genesis-file.g
+    x1tool --datadir=<datadir> genesis genesis-file.g
 
 Requires a first argument of the genesis file to import.
 Initialize the database using data from the genesis file.
@@ -40,16 +40,16 @@ Initialize the database using data from the genesis file.
 
 			Subcommands: []cli.Command{
 				{
-					Name:   "json",
-					Usage:  "Initialize the database from a testing JSON genesis file",
+					Name:      "json",
+					Usage:     "Initialize the database from a testing JSON genesis file",
 					ArgsUsage: "<filename>",
-					Action: jsonGenesisImport,
+					Action:    jsonGenesisImport,
 					Flags: []cli.Flag{
 						ExperimentalFlag,
 						ModeFlag,
 					},
 					Description: `
-    sonictool --datadir=<datadir> genesis json --experimental genesis-file.json
+    x1tool --datadir=<datadir> genesis json --experimental genesis-file.json
 
 Requires a first argument of the JSON genesis file to import.
 Initialize the database using data from the experimental genesis file.
@@ -64,7 +64,34 @@ Initialize the database using data from the experimental genesis file.
 						ModeFlag,
 					},
 					Description: `
-    sonictool --datadir=<datadir> genesis fake <N>
+    x1tool --datadir=<datadir> genesis fake <N>
+
+Requires the number of validators in the fake network as the first argument.
+Initialize the database for a testing fakenet.
+`,
+				},
+				{
+					Name:      "custom",
+					Usage:     "Initialize the database for a custom network",
+					ArgsUsage: "",
+					Action:    customGenesisImport,
+					Flags: []cli.Flag{
+						ModeFlag,
+						flags.ConfigFileFlag,
+					},
+					Description: `
+    x1tool --datadir=<datadir> --config=<configfile> genesis custom
+`,
+				},
+				{
+					Name:   "test",
+					Usage:  "Initialize the database for the testnet network",
+					Action: testGenesisImport,
+					Flags: []cli.Flag{
+						ModeFlag,
+					},
+					Description: `
+    x1tool --datadir=<datadir> genesis fake <N>
 
 Requires the number of validators in the fake network as the first argument.
 Initialize the database for a testing fakenet.
@@ -82,7 +109,7 @@ Initialize the database for a testing fakenet.
 					Usage:  "Check EVM live state database",
 					Action: checkLive,
 					Description: `
-    sonictool --datadir=<datadir> check live
+    x1tool --datadir=<datadir> check live
 
 Verifies the consistency of the EVM state database.
 The live state is used for blocks processing.
@@ -93,7 +120,7 @@ The live state is used for blocks processing.
 					Usage:  "Check EVM archive states database",
 					Action: checkArchive,
 					Description: `
-    sonictool --datadir=<datadir> check archive
+    x1tool --datadir=<datadir> check archive
 
 Verifies the consistency of the EVM state database.
 The archive state is used for RPC - allows to handle state-related RPC queries.
@@ -246,7 +273,7 @@ You must remember this passphrase to unlock your account in the future.
 
 For non-interactive use the passphrase can be specified with the --password flag:
 
-    sonictool account new --password=file
+    x1tool account new --password=file
 
 Note, this is meant to be used for testing only, it is a bad idea to save your
 password to file or expose in any other way.
@@ -273,7 +300,7 @@ format to the newest format or change the password for an account.
 
 For non-interactive use the passphrase can be specified with the --password flag:
 
-    sonictool account update --password=file <address>
+    x1tool account update --password=file <address>
 
 Since only one password can be given, only format update can be performed,
 changing your password is only possible interactively.
@@ -291,7 +318,7 @@ changing your password is only possible interactively.
 					},
 					ArgsUsage: "<keyFile>",
 					Description: `
-    sonictool account import <keyfile>
+    x1tool account import <keyfile>
 
 Imports an unencrypted private key from <keyfile> and creates a new account.
 Prints the address.
@@ -304,7 +331,7 @@ You must remember this passphrase to unlock your account in the future.
 
 For non-interactive use the passphrase can be specified with the --password flag:
 
-    sonictool account import --password=file <keyfile>
+    x1tool account import --password=file <keyfile>
 
 Note:
 As you can directly copy your encrypted accounts to another Sonic instance,

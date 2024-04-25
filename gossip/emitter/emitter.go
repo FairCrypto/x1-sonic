@@ -3,6 +3,7 @@ package emitter
 import (
 	"errors"
 	"fmt"
+	"github.com/Fantom-foundation/go-opera/opera"
 	"github.com/Fantom-foundation/go-opera/utils/txtime"
 	"github.com/ethereum/go-ethereum/metrics"
 	"math/rand"
@@ -383,8 +384,10 @@ func (em *Emitter) createEvent(sortedTxs *types.TransactionsByPriceAndNonce) (*i
 	mutEvent.SetCreationTime(inter.MaxTimestamp(inter.Timestamp(time.Now().UnixNano()), selfParentTime+1))
 
 	// add LLR votes
-	em.addLlrEpochVote(mutEvent)
-	em.addLlrBlockVotes(mutEvent)
+	if em.world.GetRules().NetworkID != opera.TestNetworkID {
+		em.addLlrEpochVote(mutEvent)
+		em.addLlrBlockVotes(mutEvent)
+	}
 
 	// node version
 	if mutEvent.Seq() <= 1 && len(em.config.VersionToPublish) > 0 {

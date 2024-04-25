@@ -15,13 +15,16 @@ import (
 )
 
 const (
-	MainNetworkID   uint64 = 0xfa
-	TestNetworkID   uint64 = 0xfa2
-	FakeNetworkID   uint64 = 0xfa3
-	DefaultEventGas uint64 = 28000
-	berlinBit              = 1 << 0
-	londonBit              = 1 << 1
-	llrBit                 = 1 << 2
+	MainNetworkID       uint64 = 0x31CE0
+	TestNetworkID       uint64 = 0x31CE5
+	FakeNetworkID       uint64 = 0x31CEF
+	DefaultEventGas     uint64 = 28000
+	berlinBit                  = 1 << 0
+	londonBit                  = 1 << 1
+	llrBit                     = 1 << 2
+	TestnetStartBalance        = 328333333
+	TestnetStartStake          = 5000000
+	TestnetGenesisTime         = inter.Timestamp(1700783108 * time.Second)
 )
 
 var DefaultVMConfig = vm.Config{
@@ -29,6 +32,26 @@ var DefaultVMConfig = vm.Config{
 		evmwriter.ContractAddress: &evmwriter.PreCompiledContract{},
 	},
 	InterpreterImpl: "geth",
+}
+
+var GenesisValidators = []GenesisValidator{
+	{
+		"0x1149aD69030084b780C5c375b252E73235AAe0d0",
+		"046e4a62824c79b42995e1144d6650dfc673029d4670dcbbdadce57f630a87e613b10cacb66f0f65995dfeedb7339af34c7d5e2031adc621c6bc0df78549726060",
+	},
+	{
+		"0x9c11DafF4913c68838ce7ce6969b12BaBff4318b",
+		"04dfc5e6a7594905af4ea831847367e22e9a02c2669d5b00407800e616e1504ab8c847d1e42c118230e593c010e0466b33410450d01811700d562e14a98c521b8f",
+	},
+	{
+		"0xa12f1025aF20f6C13385CdCFE5fc897496F87d98",
+		"04b2366cb5269d81cd00e0db9f808c43f614b44dc3abd25f54b025af498a579e7dd13de4f7573360690b23b22b2527a518ecf37119b8a03c8afc9fdbdbac98667e",
+	},
+}
+
+type GenesisValidator struct {
+	AccountAddress  string
+	ValidatorPubKey string
 }
 
 type RulesRLP struct {
@@ -165,9 +188,28 @@ func MainNetRules() Rules {
 	}
 }
 
+func CustomNetRules(networkName string, networkId uint64) Rules {
+	return Rules{
+		Name:      networkName,
+		NetworkID: networkId,
+		Dag:       DefaultDagRules(),
+		Epochs:    DefaultEpochsRules(),
+		Economy:   DefaultEconomyRules(),
+		Blocks: BlocksRules{
+			MaxBlockGas:             205000000,
+			MaxEmptyBlockSkipPeriod: inter.Timestamp(1 * time.Minute),
+		},
+		Upgrades: Upgrades{
+			Berlin: true,
+			London: true,
+			Llr:    true,
+		},
+	}
+}
+
 func TestNetRules() Rules {
 	return Rules{
-		Name:      "test",
+		Name:      "x1-testnet",
 		NetworkID: TestNetworkID,
 		Dag:       DefaultDagRules(),
 		Epochs:    DefaultEpochsRules(),
@@ -175,6 +217,11 @@ func TestNetRules() Rules {
 		Blocks: BlocksRules{
 			MaxBlockGas:             20500000,
 			MaxEmptyBlockSkipPeriod: inter.Timestamp(1 * time.Minute),
+		},
+		Upgrades: Upgrades{
+			Berlin: true,
+			London: true,
+			Llr:    true,
 		},
 	}
 }

@@ -7,6 +7,7 @@ import (
 	carmen "github.com/Fantom-foundation/Carmen/go/state"
 	"github.com/Fantom-foundation/go-opera/config/flags"
 	"github.com/Fantom-foundation/go-opera/gossip/evmstore"
+	"github.com/Fantom-foundation/go-opera/integration/makecustomgenesis"
 	"github.com/ethereum/go-ethereum/common/fdlimit"
 	"os"
 	"path"
@@ -35,7 +36,7 @@ import (
 
 const (
 	// ClientIdentifier to advertise over the network.
-	ClientIdentifier = "go-opera"
+	ClientIdentifier = "go-x1"
 )
 
 var (
@@ -67,6 +68,7 @@ type Config struct {
 	LachesisStore abft.StoreConfig
 	VectorClock   vecmt.IndexConfig
 	DBs           integration.DBsConfig
+	CustomGenesis makecustomgenesis.Config
 }
 
 func (c *Config) AppConfigs() integration.Configs {
@@ -178,7 +180,7 @@ func gossipConfigWithFlags(ctx *cli.Context, src gossip.Config) gossip.Config {
 	return cfg
 }
 
-func setEvmStore(ctx *cli.Context, datadir string, src  evmstore.StoreConfig) (evmstore.StoreConfig, error) {
+func setEvmStore(ctx *cli.Context, datadir string, src evmstore.StoreConfig) (evmstore.StoreConfig, error) {
 	cfg := src
 	cfg.StateDb.Directory = filepath.Join(datadir, "carmen")
 
@@ -226,13 +228,13 @@ const (
 	// DefaultCacheSize is calculated as memory consumption in a worst case scenario with default configuration
 	// Average memory consumption might be 3-5 times lower than the maximum
 	DefaultCacheSize  = 6 * 1024 // MB
-	ConstantCacheSize = 400 // MB
+	ConstantCacheSize = 400      // MB
 )
 
 func cacheScaler(ctx *cli.Context) cachescale.Func {
 	baseSize := DefaultCacheSize
 	totalMemory := int(memory.TotalMemory() / opt.MiB)
-	maxCache := totalMemory * 3 / 5  // max 60% of available memory
+	maxCache := totalMemory * 3 / 5 // max 60% of available memory
 	if maxCache < baseSize {
 		maxCache = baseSize
 	}
@@ -270,6 +272,7 @@ func MakeAllConfigsFromFile(ctx *cli.Context, configFile string) (*Config, error
 		Lachesis:      abft.DefaultConfig(),
 		LachesisStore: abft.DefaultStoreConfig(cacheRatio),
 		VectorClock:   vecmt.DefaultConfig(cacheRatio),
+		CustomGenesis: makecustomgenesis.DefaultConfig(),
 	}
 
 	if ctx.GlobalIsSet(FakeNetFlag.Name) {
@@ -338,6 +341,6 @@ func DefaultNodeConfig() node.Config {
 	cfg.Version = params.VersionWithCommit(GitCommit, GitDate)
 	cfg.HTTPModules = append(cfg.HTTPModules, "eth", "ftm", "dag", "abft", "web3")
 	cfg.WSModules = append(cfg.WSModules, "eth", "ftm", "dag", "abft", "web3")
-	cfg.IPCPath = "opera.ipc"
+	cfg.IPCPath = "x1.ipc"
 	return cfg
 }
